@@ -5,6 +5,68 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.1.0] - 2024-11-05
+
+### ✨ Mejorado
+
+#### Schema.org Person Ultra-Completo
+- **@id y @context**: Identificadores únicos para el autor
+- **hasOccupation**: Schema de ocupación profesional completo
+- **hasCredential**: Credenciales educativas y profesionales como array de EducationalOccupationalCredential
+- **interactionStatistic**: Contador de artículos publicados con WriteAction
+- **breadcrumb**: Navegación estructurada BreadcrumbList del autor
+- **contactPoint**: Punto de contacto profesional si email público disponible
+- **alumniOf**: Marca de profesional verificado si tiene 3+ redes sociales
+- **mainEntityOfPage**: ProfilePage si tiene website personal
+- **disambiguatingDescription**: Descripción clara del título profesional
+- **affiliation**: Afiliación a organización adicional
+- **image**: Avatar con dimensiones (400x400) y caption
+- **award**: Credenciales como premios y logros
+- **nationality** y **gender**: Campos opcionales para mayor personalización
+
+#### Diseño con Paleta Replanta
+- **Variables CSS**: Implementación completa de la paleta Replanta
+  - `--rep-green: #93F1C9` - Accents
+  - `--rep-forest: #1E2F23` - Textos principales
+  - `--rep-teal: #41999F` - Links, botones, iconos
+  - `--rep-mint: #92F1CB` - Highlights y borders
+  - `--rep-bg-light: #F7FBF9` - Backgrounds suaves
+  - `--rep-text-secondary: #3B4B45` - Texto secundario
+  - `--rep-text-tertiary: #547065` - Texto terciario
+  - `--rep-border: #E6F3EF` - Bordes sutiles
+
+#### Audit Box Minimal - Estilo Periódico
+- **Sin backgrounds invasivos**: Eliminado gradiente morado/azul
+- **Bordes sutiles**: Solo border-top y border-bottom con `rep-border`
+- **Padding reducido**: De 24px a 12px vertical
+- **Header oculto**: Sin título para look ultra-minimal
+- **Typography pequeña**: 13px en todo el bloque
+- **Layout inline**: Items fluyen horizontalmente como metadata
+- **Iconos discretos**: 14px con opacity 0.5 en `rep-teal`
+- **Responsive mejorado**: Stack vertical en mobile
+
+#### Author Box con Paleta Replanta
+- **Avatar border**: `rep-mint` (#92F1CB) en lugar de blanco
+- **Job title color**: `rep-teal` en lugar de azul genérico
+- **Botón CTA**: Background `rep-teal` con hover a `rep-forest`
+- **Credentials border**: `rep-teal` en borde izquierdo
+- **Expertise background**: Tint de `rep-green` con opacity
+- **Social links hover**: `rep-teal` con sombra suave
+
+#### Related Posts con Teal
+- **Header border**: `rep-mint` en lugar de azul
+- **Hover border**: `rep-mint` en cards
+- **Title hover**: `rep-teal` en lugar de azul
+- **Icons color**: `rep-teal` en metadata
+
+### 🎨 Cambios de Diseño
+
+- Eliminados todos los colores azules/morados genéricos
+- Implementada paleta corporativa Replanta en todos los componentes
+- Audit box transformado en diseño editorial minimal
+- Mejora de contraste con `rep-forest` para textos principales
+- Borders y backgrounds más sutiles y profesionales
+
 ## [1.0.0] - 2024-01-XX
 
 ### ✨ Añadido
