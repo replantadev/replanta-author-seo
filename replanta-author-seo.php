@@ -3,7 +3,7 @@
  * Plugin Name: Replanta Author SEO
  * Plugin URI: https://replanta.net
  * Description: Sistema completo de autoría SEO con Schema.org Article+Author+Organization, auditoría de artículos, related posts inteligente y gestión avanzada de autores
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: Replanta
  * Author URI: https://replanta.net
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Constantes del plugin
-define('REPLANTA_AUTHOR_SEO_VERSION', '1.2.1');
+define('REPLANTA_AUTHOR_SEO_VERSION', '1.2.2');
 define('REPLANTA_AUTHOR_SEO_FILE', __FILE__);
 define('REPLANTA_AUTHOR_SEO_DIR', plugin_dir_path(__FILE__));
 define('REPLANTA_AUTHOR_SEO_URL', plugin_dir_url(__FILE__));
@@ -155,8 +155,16 @@ class Replanta_Author_SEO {
                 'replanta-author-seo'
             );
             
-            // Habilitar releases
+            // Configurar para usar releases de GitHub
+            $updateChecker->setBranch('main');
             $updateChecker->getVcsApi()->enableReleaseAssets();
+            
+            // Forzar chequeo de releases en vez de tags
+            if (method_exists($updateChecker, 'checkForUpdates')) {
+                add_action('admin_init', function() use ($updateChecker) {
+                    $updateChecker->checkForUpdates();
+                });
+            }
         }
     }
 }

@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 # Changelog
 
+## [1.2.2] - 2024-11-06
+
+### Fixed
+- Auto-updater: Configurado branch 'main' y forzado chequeo en admin_init
+- Auto-updater: Ahora detecta correctamente releases de GitHub
+
 ## [1.2.1] - 2024-11-06
 
 ### Fixed
