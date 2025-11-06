@@ -5,6 +5,27 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+# Changelog
+
+## [1.2.0] - 2024-11-05
+
+### Added
+- **Compatibilidad completa con RankMath SEO**: Integración inteligente que enriquece el Schema de RankMath sin duplicar contenido
+- Detección automática de RankMath activo
+- Filtro `rank_math/json_ld` para enriquecer el Person Schema de RankMath con todos nuestros datos
+- Enriquecimiento de Article Schema de RankMath (wordCount, articleSection)
+
+### Changed
+- El plugin ahora adapta su comportamiento según RankMath esté activo o no
+- Si RankMath está activo: Enriquece su Schema existente (sin duplicados)
+- Si RankMath NO está activo: Genera Schema completo propio
+
+### Technical
+- Método `is_rankmath_active()` para detectar RankMath
+- Método `enrich_rankmath_schema()` para integrar con filtro de RankMath
+- Método `enrich_author_schema()` para añadir nuestros datos Person al Schema de RankMath
+- Prioridad 99 en filtro RankMath para ejecutar después de RankMath
+
 ## [1.1.0] - 2024-11-05
 
 ### ✨ Mejorado

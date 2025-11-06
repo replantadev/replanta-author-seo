@@ -21,12 +21,184 @@ class Replanta_Schema_Generator {
     }
     
     private function __construct() {
-        // Inyectar schema en el head
-        add_action('wp_head', [$this, 'output_schema'], 1);
+        // Detectar si RankMath está activo
+        if ($this->is_rankmath_active()) {
+            // Integrar con RankMath enriqueciendo su Schema
+            add_filter('rank_math/json_ld', [$this, 'enrich_rankmath_schema'], 99, 2);
+        } else {
+            // Generar nuestro propio Schema
+            add_action('wp_head', [$this, 'output_schema'], 1);
+        }
     }
     
     /**
-     * Output del schema en el head
+     * Verificar si RankMath está activo
+     */
+    private function is_rankmath_active() {
+        return defined('RANK_MATH_VERSION') || class_exists('RankMath');
+    }
+    
+    /**
+     * Enriquecer el Schema de RankMath con nuestros datos de autor
+     */
+    public function enrich_rankmath_schema($data, $jsonld) {
+        $options = get_option('replanta_author_seo_options', []);
+        
+        if (empty($options['enable_schema'])) {
+            return $data;
+        }
+        
+        if (!is_single() && !is_page()) {
+            return $data;
+        }
+        
+        // Buscar el Article schema en RankMath
+        if (isset($data['@graph']) && is_array($data['@graph'])) {
+            foreach ($data['@graph'] as $key => $schema_piece) {
+                // Enriquecer el Author (Person)
+                if (isset($schema_piece['@type']) && $schema_piece['@type'] === 'Person') {
+                    $post = get_post();
+                    if ($post) {
+                        $author_data = Replanta_Author_Fields::get_author_data($post->post_author);
+                        $enriched_author = $this->enrich_author_schema($schema_piece, $author_data, $post->post_author);
+                        $data['@graph'][$key] = $enriched_author;
+                    }
+                }
+                
+                // Enriquecer el Article con wordCount y mejoras
+                if (isset($schema_piece['@type']) && in_array($schema_piece['@type'], ['Article', 'BlogPosting', 'NewsArticle'])) {
+                    $post = get_post();
+                    if ($post) {
+                        $word_count = str_word_count(strip_tags($post->post_content));
+                        if ($word_count > 0) {
+                            $data['@graph'][$key]['wordCount'] = $word_count;
+                        }
+                        
+                        // Añadir articleSection si no existe
+                        if (!isset($data['@graph'][$key]['articleSection'])) {
+                            $categories = get_the_category();
+                            if (!empty($categories)) {
+                                $data['@graph'][$key]['articleSection'] = $categories[0]->name;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * Enriquecer Schema Person existente de RankMath
+     */
+    private function enrich_author_schema($existing_schema, $author_data, $author_id) {
+        if (!$author_data) {
+            return $existing_schema;
+        }
+        
+        // Mantener lo que RankMath ya tiene, añadir nuestros datos
+        $enriched = $existing_schema;
+        
+        // Añadir @id si no existe
+        if (!isset($enriched['@id'])) {
+            $enriched['@id'] = $author_data['url'] . '#person';
+        }
+        
+        // Añadir job title
+        if (!empty($author_data['job_title'])) {
+            $enriched['jobTitle'] = $author_data['job_title'];
+            $enriched['hasOccupation'] = [
+                '@type' => 'Occupation',
+                'name' => $author_data['job_title'],
+            ];
+        }
+        
+        // Añadir organización
+        if (!empty($author_data['organization'])) {
+            $enriched['worksFor'] = [
+                '@type' => 'Organization',
+                'name' => $author_data['organization'],
+                'url' => get_bloginfo('url'),
+            ];
+            $enriched['affiliation'] = [
+                '@type' => 'Organization',
+                'name' => $author_data['organization'],
+            ];
+        }
+        
+        // Enriquecer sameAs con redes sociales
+        $same_as = isset($enriched['sameAs']) ? (array) $enriched['sameAs'] : [];
+        if (!empty($author_data['social_links'])) {
+            $same_as = array_merge($same_as, array_values($author_data['social_links']));
+        }
+        if (!empty($author_data['website_url'])) {
+            $same_as[] = $author_data['website_url'];
+        }
+        if (!empty($same_as)) {
+            $enriched['sameAs'] = array_unique($same_as);
+        }
+        
+        // Añadir credenciales
+        if (!empty($author_data['expertise_areas'])) {
+            $expertise = array_map('trim', explode(',', $author_data['expertise_areas']));
+            $enriched['knowsAbout'] = $expertise;
+            
+            $enriched['hasCredential'] = [];
+            foreach ($expertise as $area) {
+                $enriched['hasCredential'][] = [
+                    '@type' => 'EducationalOccupationalCredential',
+                    'credentialCategory' => 'Expertise',
+                    'name' => $area,
+                ];
+            }
+        }
+        
+        // Añadir awards/credentials
+        if (!empty($author_data['credentials'])) {
+            $credentials_list = array_filter(array_map('trim', explode("\n", $author_data['credentials'])));
+            if (!empty($credentials_list)) {
+                $enriched['award'] = $credentials_list;
+                
+                if (empty($enriched['hasCredential'])) {
+                    $enriched['hasCredential'] = [];
+                }
+                foreach ($credentials_list as $credential) {
+                    $enriched['hasCredential'][] = [
+                        '@type' => 'EducationalOccupationalCredential',
+                        'name' => $credential,
+                    ];
+                }
+            }
+        }
+        
+        // Añadir interactionStatistic
+        $author_posts = count_user_posts($author_id, 'post', true);
+        if ($author_posts > 0) {
+            $enriched['interactionStatistic'] = [
+                '@type' => 'InteractionCounter',
+                'interactionType' => 'https://schema.org/WriteAction',
+                'userInteractionCount' => $author_posts,
+            ];
+        }
+        
+        // Mejorar imagen si tenemos avatar personalizado
+        $avatar_url = Replanta_Avatar_Uploader::get_author_avatar_url($author_id);
+        if ($avatar_url) {
+            $enriched['image'] = [
+                '@type' => 'ImageObject',
+                'url' => $avatar_url,
+                'width' => 400,
+                'height' => 400,
+                'caption' => $author_data['name'],
+            ];
+        }
+        
+        return $enriched;
+    }
+    
+    /**
+     * Output del schema en el head (cuando RankMath NO está activo)
      */
     public function output_schema() {
         if (!is_single() && !is_page()) {
