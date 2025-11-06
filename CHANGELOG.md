@@ -7,6 +7,18 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 # Changelog
 
+## [1.2.1] - 2024-11-06
+
+### Fixed
+- **CRITICAL**: Ahora sí se añade el Schema Person completo al @graph cuando RankMath está activo
+- Si RankMath no incluye Person schema, lo añadimos nosotros con todos los datos enriquecidos
+- El Article schema ahora apunta correctamente al @id del Person (#person)
+- Añadido método `generate_complete_author_schema()` para crear Person desde cero
+
+### Changed
+- Mejorada lógica de detección: primero enriquece Person existente, si no existe lo crea completo
+- El flag `$author_schema_found` controla si añadir Person al @graph
+
 ## [1.2.0] - 2024-11-05
 
 ### Added

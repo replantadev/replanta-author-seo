@@ -52,41 +52,75 @@ class Replanta_Schema_Generator {
             return $data;
         }
         
-        // Buscar el Article schema en RankMath
+        $post = get_post();
+        if (!$post) {
+            return $data;
+        }
+        
+        $author_data = Replanta_Author_Fields::get_author_data($post->post_author);
+        if (!$author_data) {
+            return $data;
+        }
+        
+        $author_schema_found = false;
+        
+        // Buscar y enriquecer schemas existentes en @graph
         if (isset($data['@graph']) && is_array($data['@graph'])) {
             foreach ($data['@graph'] as $key => $schema_piece) {
-                // Enriquecer el Author (Person)
+                // Enriquecer el Author (Person) si existe
                 if (isset($schema_piece['@type']) && $schema_piece['@type'] === 'Person') {
-                    $post = get_post();
-                    if ($post) {
-                        $author_data = Replanta_Author_Fields::get_author_data($post->post_author);
-                        $enriched_author = $this->enrich_author_schema($schema_piece, $author_data, $post->post_author);
-                        $data['@graph'][$key] = $enriched_author;
-                    }
+                    $enriched_author = $this->enrich_author_schema($schema_piece, $author_data, $post->post_author);
+                    $data['@graph'][$key] = $enriched_author;
+                    $author_schema_found = true;
                 }
                 
                 // Enriquecer el Article con wordCount y mejoras
                 if (isset($schema_piece['@type']) && in_array($schema_piece['@type'], ['Article', 'BlogPosting', 'NewsArticle'])) {
-                    $post = get_post();
-                    if ($post) {
-                        $word_count = str_word_count(strip_tags($post->post_content));
-                        if ($word_count > 0) {
-                            $data['@graph'][$key]['wordCount'] = $word_count;
-                        }
-                        
-                        // Añadir articleSection si no existe
-                        if (!isset($data['@graph'][$key]['articleSection'])) {
-                            $categories = get_the_category();
-                            if (!empty($categories)) {
-                                $data['@graph'][$key]['articleSection'] = $categories[0]->name;
-                            }
+                    $word_count = str_word_count(strip_tags($post->post_content));
+                    if ($word_count > 0) {
+                        $data['@graph'][$key]['wordCount'] = $word_count;
+                    }
+                    
+                    // Añadir articleSection si no existe
+                    if (!isset($data['@graph'][$key]['articleSection'])) {
+                        $categories = get_the_category();
+                        if (!empty($categories)) {
+                            $data['@graph'][$key]['articleSection'] = $categories[0]->name;
                         }
                     }
+                    
+                    // Asegurar que el Article apunta al author completo
+                    if (!$author_schema_found) {
+                        $data['@graph'][$key]['author'] = [
+                            '@type' => 'Person',
+                            '@id' => $author_data['url'] . '#person',
+                        ];
+                    }
                 }
+            }
+            
+            // Si NO se encontró Person schema, añadirlo completo
+            if (!$author_schema_found) {
+                $complete_author = $this->generate_complete_author_schema($author_data, $post->post_author);
+                $data['@graph'][] = $complete_author;
             }
         }
         
         return $data;
+    }
+    
+    /**
+     * Generar Schema Person completo para añadir al @graph
+     */
+    private function generate_complete_author_schema($author_data, $author_id) {
+        $schema = [
+            '@type' => 'Person',
+            '@id' => $author_data['url'] . '#person',
+            'name' => $author_data['name'],
+            'url' => $author_data['url'],
+        ];
+        
+        return $this->enrich_author_schema($schema, $author_data, $author_id);
     }
     
     /**
