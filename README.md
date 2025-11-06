@@ -2,7 +2,7 @@
 
 Plugin de WordPress para mejorar el SEO de autores con Schema.org completo, auditoría de artículos, cajas de autor y artículos relacionados inteligentes.
 
-## 🚀 Características
+##  Características
 
 - **Schema.org Completo**: Marcado estructurado de Article, Person y Organization
 - **Auditoría de Artículos**: Información de publicación, tiempo de lectura, palabras
@@ -11,13 +11,13 @@ Plugin de WordPress para mejorar el SEO de autores con Schema.org completo, audi
 - **Avatar Personalizado**: Sistema de upload sin depender de Gravatar
 - **Auto-actualización**: Sistema de actualizaciones automáticas desde GitHub
 
-## 📋 Requisitos
+##  Requisitos
 
 - WordPress 5.8 o superior
 - PHP 7.4 o superior
 - Composer (para desarrollo)
 
-## 🔧 Instalación
+##  Instalación
 
 ### Instalación Manual
 
@@ -32,16 +32,16 @@ Plugin de WordPress para mejorar el SEO de autores con Schema.org completo, audi
 composer require yahnis-elsts/plugin-update-checker
 ```
 
-## ⚙️ Configuración
+##  Configuración
 
 ### 1. Configuración General
 
 Ve a **Ajustes > Author SEO** y configura:
 
-- ✅ Activar Schema.org
-- ✅ Mostrar bloque de auditoría
-- ✅ Mostrar caja de autor
-- ✅ Mostrar artículos relacionados
+-  Activar Schema.org
+-  Mostrar bloque de auditoría
+-  Mostrar caja de autor
+-  Mostrar artículos relacionados
 
 ### 2. Información de la Organización
 
@@ -80,7 +80,7 @@ En **Usuarios > Tu Perfil > Avatar Personalizado**:
 
 El avatar reemplaza automáticamente a Gravatar.
 
-## 📖 Uso
+##  Uso
 
 ### Shortcodes Disponibles
 
@@ -124,7 +124,7 @@ $related_posts_instance = Replanta_Related_Posts::instance();
 $related = $related_posts_instance->get_related_posts($post_id, 6);
 ```
 
-## 🎨 Schema.org
+##  Schema.org
 
 El plugin genera automáticamente tres tipos de Schema:
 
@@ -173,14 +173,14 @@ El plugin genera automáticamente tres tipos de Schema:
 }
 ```
 
-## 🧪 Validación de Schema
+##  Validación de Schema
 
 Valida el marcado generado en:
 
 - [Google Rich Results Test](https://search.google.com/test/rich-results)
 - [Schema.org Validator](https://validator.schema.org/)
 
-## 🎯 Algoritmo de Artículos Relacionados
+##  Algoritmo de Artículos Relacionados
 
 El sistema calcula un score por cada post:
 
@@ -191,7 +191,7 @@ El sistema calcula un score por cada post:
 
 Los posts con mayor score se muestran primero.
 
-## 🔄 Actualizaciones
+##  Actualizaciones
 
 El plugin se actualiza automáticamente desde GitHub:
 
