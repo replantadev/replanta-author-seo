@@ -7,6 +7,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 # Changelog
 
+## [1.2.3] - 2024-11-06
+
+### Fixed
+- **CRÍTICO**: Person Schema ahora se output SIEMPRE como JSON-LD separado cuando RankMath está activo
+- Método `output_person_schema_only()` asegura que el autor aparezca en Google Rich Results Testing Tool
+- Prioridad 5 en wp_head para output después de RankMath pero antes de otros plugins
+
+### Technical
+- Doble estrategia con RankMath: filtro para enriquecer @graph + output separado para garantizar visibilidad
+- Ahora el tester de Google debería mostrar 4 elementos válidos: Article, Person, Organization, Breadcrumb
+
 ## [1.2.2] - 2024-11-06
 
 ### Fixed

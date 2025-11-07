@@ -25,6 +25,8 @@ class Replanta_Schema_Generator {
         if ($this->is_rankmath_active()) {
             // Integrar con RankMath enriqueciendo su Schema
             add_filter('rank_math/json_ld', [$this, 'enrich_rankmath_schema'], 99, 2);
+            // ADEMÁS: Siempre output el Person schema por separado para asegurar que aparezca
+            add_action('wp_head', [$this, 'output_person_schema_only'], 5);
         } else {
             // Generar nuestro propio Schema
             add_action('wp_head', [$this, 'output_schema'], 1);
@@ -229,6 +231,42 @@ class Replanta_Schema_Generator {
         }
         
         return $enriched;
+    }
+    
+    /**
+     * Output SOLO del Person schema cuando RankMath está activo
+     * (para asegurar que siempre aparezca en el tester de Google)
+     */
+    public function output_person_schema_only() {
+        if (!is_single() && !is_page()) {
+            return;
+        }
+        
+        $options = get_option('replanta_author_seo_options', []);
+        
+        if (empty($options['enable_schema'])) {
+            return;
+        }
+        
+        $post = get_post();
+        if (!$post) {
+            return;
+        }
+        
+        $author_data = Replanta_Author_Fields::get_author_data($post->post_author);
+        if (!$author_data) {
+            return;
+        }
+        
+        // Generar Person schema completo
+        $person_schema = $this->generate_complete_author_schema($author_data, $post->post_author);
+        
+        if ($person_schema) {
+            echo "\n<!-- Replanta Author SEO - Person Schema (RankMath Compatible) -->\n";
+            echo '<script type="application/ld+json">' . "\n";
+            echo wp_json_encode($person_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            echo "\n</script>\n";
+        }
     }
     
     /**
